@@ -1,0 +1,37 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16
+    container_name: practica_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "5432"
+      POSTGRES_DB: postgres
+    ports:
+      - "5433:5432"   # host:contenedor -> usamos 5433 en el host para no chocar con tu Postgres local en 5432
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: .
+    container_name: practica_app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env
+    volumes:
+      - .:/code
+    # Deja el contenedor vivo para poder entrar y correr comandos de alembic manualmente
+    command: tail -f /dev/null
+
+volumes:
+  db_data:

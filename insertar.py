@@ -8,7 +8,9 @@ from app.models.ventas import Venta
 from app.models.departamentos import Departamento
 from app.models.productos import Producto
 from app.models.proveedores import Proveedor
+from app.models.detalle_ventas import DetalleVenta
 from app.models import Base
+
 
 # Conexión al PostgreSQL del contenedor Docker
 DATABASE_URL = "postgresql://postgres:5432@localhost:5433/postgres"
@@ -17,11 +19,9 @@ engine = create_engine("postgresql://postgres:5432@localhost:5433/postgres")
 Session = sessionmaker(bind=engine)
 session = Session()
 
-
 #============================
 #INSERTAR PROVEEDORES
 #==========================
-
 
 proveedores = [
     ("TechSupply S.A.", "ventas@techsupply.com", "555-0101"),
@@ -128,8 +128,6 @@ for nombre, puesto_nombre, email in trabajadores:
 session.commit()
 print("Trabajadores insertados correctamente.")
 
-
-
 # ============================
 # INSERTAR PRODUCTOS
 # ============================
@@ -150,7 +148,6 @@ session.commit()
 print("Productos insertados correctamente.")
 
 
-
 # ============================
 # INSERTAR VENTAS
 # ============================
@@ -166,3 +163,31 @@ for nombre_cliente in ventas:
 
 session.commit()
 print("Ventas insertadas correctamente.")
+
+# ============================
+# INSERTAR DETALLE_VENTAS
+# ============================
+
+detalles = [
+    ("Juan Pérez", "Laptop", 1),
+    ("Juan Pérez", "Mouse", 2),
+    ("María López", "Monitor", 1),
+    ("Carlos Sánchez", "Teclado", 1),
+    ("Ana Torres", "Mouse", 1),
+]
+
+for nombre_cliente, nombre_producto, cantidad in detalles:
+    venta = next(v for v in ventas_creadas if v.id_cliente == clientes_creados[nombre_cliente].id_cliente)
+    producto = productos_creados[nombre_producto]
+
+    detalle = DetalleVenta(
+        id_venta=venta.id_venta,
+        id_producto=producto.id_producto,
+        cantidad=cantidad,
+        precio_unitario=producto.precio_unitario
+    )
+
+    session.add(detalle)
+
+session.commit()
+print("Detalles de ventas insertados correctamente.")

@@ -6,6 +6,7 @@ from app.models.trabajadores import Trabajador
 from app.models.puestos import Puesto
 from app.models.ventas import Venta
 from app.models.departamentos import Departamento
+from app.models.productos import Producto
 from app.models.proveedores import Proveedor
 from app.models import Base
 
@@ -63,20 +64,21 @@ print("Departamentos insertados correctamente.")
 # ============================
 
 clientes = [
-    ("Juan Pérez", "12345678A"),
-    ("María López", "87654321B"),
-    ("Carlos Sánchez", "11223344C"),
-    ("Ana Torres", "55667788D"),
-    ("Luis Ramírez", "99887766E"),
-    ("Sofía Gómez", "44556677F"),
-    ("Pedro Castillo", "22334455G"),
-    ("Laura Fernández", "66778899H"),
+    ("Juan Pérez", "12345678A", "612345789"),
+    ("María López", "87654321B", "634892117"),
+    ("Carlos Sánchez", "11223344C", "698441203"),
+    ("Ana Torres", "55667788D", "622908554"),
+    ("Luis Ramírez", "99887766E", "645771902"),
+    ("Sofía Gómez", "44556677F", "677540129"),
+    ("Pedro Castillo", "22334455G", "693218447"),
+    ("Laura Fernández", "66778899H", "656709331"),
 ]
+
 
 clientes_creados = {}
 
-for nombre, dni in clientes:
-    cliente = Cliente(nombre_cliente=nombre, dni_cliente=dni)
+for nombre, dni, telefono in clientes:
+    cliente = Cliente(nombre_cliente=nombre, dni_cliente=dni,  telefono=telefono)
     session.add(cliente)
     session.flush()
     clientes_creados[nombre] = cliente
@@ -125,6 +127,29 @@ for nombre, puesto_nombre, email in trabajadores:
 
 session.commit()
 print("Trabajadores insertados correctamente.")
+
+
+
+# ============================
+# INSERTAR PRODUCTOS
+# ============================
+
+productos = [
+    ("Laptop", 899.99, "Electronica", 15),
+    ("Mouse", 15.50, "Electronica", 120),
+    ("Teclado", 45.00, "Electronica", 80),
+    ("Monitor", 210.00, "Electronica", 30),
+]
+productos_creados = {}
+for nombre, precio, categoria, stock in productos:
+    producto = Producto(nombre_producto=nombre, precio_unitario=precio, categoria=categoria, stock=stock)
+    session.add(producto)
+    session.flush()
+    productos_creados[nombre] = producto
+session.commit()
+print("Productos insertados correctamente.")
+
+
 
 # ============================
 # INSERTAR VENTAS

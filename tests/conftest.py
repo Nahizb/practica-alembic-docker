@@ -10,21 +10,33 @@ from sqlalchemy.orm import sessionmaker
 from alembic.config import Config
 from alembic import command
 
+# IMPORTANTE: usamos un nombre de variable DISTINTO a DATABASE_URL
+# a propósito, para que nunca pueda colisionar con la variable real
+# que usa la aplicación (definida en .env / docker-compose env_file).
 TEST_DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    "postgresql://postgres:5432@db:5432/postgres_test"  # default para uso local dentro del contenedor app
+    "TEST_DATABASE_URL",
+    "postgresql://postgres:5432@db:5432/postgres_test"
 )
 
 engine = create_engine(TEST_DATABASE_URL)
 TestingSessionLocal = sessionmaker(bind=engine)
 
 
+def _assert_is_test_database(url: str) -> None:
+    """Salvaguarda: nunca permitir downgrade/upgrade destructivo
+    si la URL no apunta claramente a una base de datos de test."""
+    if "test" not in url.lower():
+        raise RuntimeError(
+            f"BLOQUEADO: '{url}' no parece una base de datos de TEST "
+            "(no contiene 'test' en el nombre). Abortando para evitar "
+            "borrar datos reales por accidente."
+        )
+
+
 def _alembic_config() -> Config:
-    """Construye la config de Alembic apuntando a la DB de test."""
+    _assert_is_test_database(TEST_DATABASE_URL)
     cfg = Config(os.path.join(ROOT_DIR, "alembic.ini"))
     cfg.set_main_option("script_location", os.path.join(ROOT_DIR, "alembic"))
-    # env.py lee DATABASE_URL desde el entorno (os.getenv), así que
-    # sobreescribimos la variable de entorno ANTES de que env.py la lea.
     os.environ["DATABASE_URL"] = TEST_DATABASE_URL
     return cfg
 
@@ -32,9 +44,7 @@ def _alembic_config() -> Config:
 @pytest.fixture(scope="session", autouse=True)
 def setup_database():
     cfg = _alembic_config()
-    # Empezamos desde un estado completamente limpio
     command.downgrade(cfg, "base")
-    # Corre TODAS las migraciones reales, en orden, tal como en producción
     command.upgrade(cfg, "head")
     yield
     command.downgrade(cfg, "base")

@@ -10,3 +10,4 @@ from .productos import Producto            # noqa: E402,F401
 from .detalle_ventas import DetalleVenta   # noqa: E402,F401
 from .departamentos import Departamento
 from .proveedores import Proveedor          # noqa: E402,F401
+from .trabajador_departamento import TrabajadorDepartamento  # noqa: E402,F401

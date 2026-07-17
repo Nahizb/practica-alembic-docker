@@ -10,6 +10,9 @@ from app.models.departamentos import Departamento
 from app.models.productos import Producto
 from app.models.proveedores import Proveedor
 from app.models.detalle_ventas import DetalleVenta
+from app.models.trabajador_departamento import TrabajadorDepartamento
+from app.models.departamentos import Departamento
+
 from app.models import Base
 
 DATABASE_URL = "postgresql://postgres:5432@localhost:5433/postgres"
@@ -23,7 +26,7 @@ random.seed(42)  # reproducible: mismos datos "aleatorios" cada vez que lo corra
 # LIMPIAR TODO ANTES DE SEMBRAR (equivalente al TRUNCATE que veniamos haciendo)
 # ============================
 session.execute(text("""
-    TRUNCATE detalle_ventas, ventas, trabajadores, clientes,
+    TRUNCATE trabajador_departamento, detalle_ventas, ventas, trabajadores, clientes,
              puestos, departamentos, proveedores, productos
     RESTART IDENTITY CASCADE
 """))
@@ -179,5 +182,26 @@ for venta in ventas_creadas:
         detalles_creados += 1
 session.commit()
 print(f"Detalles de venta insertados: {detalles_creados}")
+
+# ============================
+# TRABAJADOR_DEPARTAMENTO (N:M, cada trabajador en 1 a 3 departamentos)
+# ============================
+
+roles_posibles = ["Miembro", "Colaborador", "Coordinador", "Responsable"]
+departamentos_creados = session.query(Departamento).all()
+
+asignaciones_creadas = 0
+for trabajador in trabajadores_creados:
+    deptos_asignados = random.sample(departamentos_creados, k=random.randint(1, 3))
+    for depto in deptos_asignados:
+        asignacion = TrabajadorDepartamento(
+            id_trabajador=trabajador.id_trabajador,
+            id_departamento=depto.id_departamento,
+            rol=random.choice(roles_posibles),
+        )
+        session.add(asignacion)
+        asignaciones_creadas += 1
+session.commit()
+print(f"Asignaciones trabajador-departamento insertadas: {asignaciones_creadas}")
 
 print("\n=== SIEMBRA MASIVA COMPLETADA ===")

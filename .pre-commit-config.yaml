@@ -1,0 +1,9 @@
+repos:
+  - repo: local
+    hooks:
+      - id: pytest-docker
+        name: Correr tests con pytest (docker compose)
+        entry: bash -c 'docker compose run --rm app pytest'
+        language: system
+        pass_filenames: false
+        always_run: true

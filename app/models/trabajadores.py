@@ -13,3 +13,5 @@ class Trabajador(Base):
     email = Column(String(45), nullable=False)
 
     puesto = relationship("Puesto", back_populates="trabajadores")
+    departamentos = relationship("TrabajadorDepartamento", back_populates="trabajador")
+
